@@ -2,215 +2,299 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Summon Simulator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎯 Summon Simulator</title>
 <style>
     body {
-        font-family: Arial, sans-serif;
-        background: #1a1a1a;
-        color: #fff;
+        font-family: 'Segoe UI', sans-serif;
+        background: linear-gradient(to right, #1c1c1c, #2a2a2a);
+        color: white;
         text-align: center;
         padding: 20px;
     }
-    button {
-        background: #ffcc00;
-        border: none;
-        padding: 10px 20px;
-        margin: 5px;
-        cursor: pointer;
-        font-weight: bold;
-        border-radius: 8px;
-    }
-    button:hover {
-        background: #ffdb4d;
-    }
-    #results {
-        margin-top: 20px;
-        padding: 15px;
-        background: #262626;
-        border-radius: 10px;
-    }
-    .rarity-3 { color: #b0c4de; }
-    .rarity-4 { color: #9932cc; }
-    .rarity-5 { color: gold; }
-    .rarity-unbound { color: cyan; font-weight: bold; }
-    #bannerSelected {
-        margin-top: 10px;
-        font-size: 18px;
-        font-weight: bold;
+    h1 {
         color: gold;
+        margin-bottom: 10px;
+        text-shadow: 0 0 10px gold;
+    }
+    h3 { margin-bottom: 10px; }
+    .btn {
+        padding: 12px 25px;
+        margin: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        border: none;
+        border-radius: 10px;
+        transition: 0.3s;
+        font-weight: bold;
+    }
+    .bannerX { background: linear-gradient(to right, crimson, darkred); color: white; }
+    .bannerY { background: linear-gradient(to right, royalblue, navy); color: white; }
+    .start { background: linear-gradient(to right, limegreen, green); color: black; }
+    .reset { background: linear-gradient(to right, orange, darkorange); color: black; }
+    .continue { background: linear-gradient(to right, purple, darkviolet); color: white; }
+    .untilUnbound { background: linear-gradient(to right, gold, goldenrod); color: black; }
+    .btn:hover { transform: scale(1.08); filter: brightness(1.1); }
+    input {
+        padding: 8px;
+        margin: 5px;
+        font-size: 16px;
+        border-radius: 5px;
+        border: none;
+        text-align: center;
+        outline: none;
+    }
+    #bannerSelecionado { font-weight: bold; font-size: 18px; color: gold; margin-top: 10px; }
+    #resultado { margin-top: 20px; text-align: center; }
+    .card {
+        display: inline-block;
+        margin: 8px;
+        padding: 10px;
+        border-radius: 12px;
+        background-color: #2a2a2a;
+        width: 140px;
+        text-align: center;
+        box-shadow: 0 0 10px rgba(255,255,255,0.1);
+        transition: 0.3s;
+    }
+    .card:hover { transform: scale(1.05); }
+    .card img { width: 100px; border-radius: 8px; }
+    .Unbound { border: 3px solid gold; animation: pulse 1s infinite; }
+    .Shiny { border: 3px solid cyan; animation: shinyGlow 1s infinite; }
+    .five { border: 3px solid orange; }
+    .four { border: 3px solid violet; }
+    .three { border: 3px solid gray; }
+    @keyframes pulse {
+        0% { box-shadow: 0 0 10px gold; }
+        50% { box-shadow: 0 0 30px gold; }
+        100% { box-shadow: 0 0 10px gold; }
+    }
+    @keyframes shinyGlow {
+        0% { box-shadow: 0 0 10px cyan; }
+        50% { box-shadow: 0 0 30px cyan; }
+        100% { box-shadow: 0 0 10px cyan; }
+    }
+    #animacao {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.9);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        color: white;
+        font-size: 24px;
+    }
+    .spin {
+        width: 120px;
+        height: 120px;
+        border: 10px solid rgba(255,255,255,0.2);
+        border-top: 10px solid gold;
+        border-radius: 50%;
+        animation: girar 1s linear infinite;
+        margin-bottom: 15px;
+    }
+    @keyframes girar {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
 </style>
 </head>
 <body>
 
-<h1>Summon Simulator</h1>
+<h1>🎯 Summon Simulator</h1>
 
-<div>
-    <button onclick="chooseBanner('X')">Banner X</button>
-    <button onclick="chooseBanner('Y')">Banner Y</button>
+<h3>Choose the Banner:</h3>
+<button class="btn bannerX" onclick="chooseBanner('X')">Banner X (Kokushibo)</button>
+<button class="btn bannerY" onclick="chooseBanner('Y')">Banner Y (Chrollo)</button>
+
+<p id="bannerSelecionado">🎯 No banner selected</p>
+
+<p>Gems: <input type="number" id="gemas" value="1000"></p>
+<p><strong>💎 Total Gems Spent:</strong> <span id="contadorGemas">0</span></p>
+<p><strong>⭐ Pity Counter:</strong> <span id="contadorPity">0</span> / 100</p>
+
+<button class="btn start" onclick="startSimulation()">🎲 Run Simulation</button>
+<button id="continueBtn" class="btn continue" onclick="continueSimulation()" style="display:none;">⏩ Continue Summoning</button>
+<button class="btn untilUnbound" onclick="untilUnbound()">🎯 Summon until Unbound</button>
+<button class="btn reset" onclick="resetGame()">♻ Reset</button>
+
+<div id="resultado"></div>
+
+<div id="animacao">
+    <div class="spin"></div>
+    <p>Opening...</p>
 </div>
-
-<p id="bannerSelected">🎯 No banner selected</p>
-
-<div>
-    <input type="number" id="gemsInput" placeholder="Enter gems" min="50">
-</div>
-
-<div>
-    <button onclick="summon()">Summon</button>
-    <button onclick="summonUntilUnbound()">Summon Until Unbound</button>
-    <button id="continueBtn" onclick="continueSummoning()" style="display:none;">Continue Summoning</button>
-    <button onclick="resetSimulator()">Reset</button>
-</div>
-
-<div id="results"></div>
 
 <script>
-let bannerChosen = null;
-let gems = 0;
+let selectedBanner = null;
+let inventory = [];
+let counts = { "3★": 0, "4★": 0, "5★": 0, "Unbound": 0, "Shiny": 0, "Shiny Unbound": 0 };
+let gemsSpent = 0;
 let pityCounter = 0;
-let counts = {
-    "3★": 0,
-    "4★": 0,
-    "5★": 0,
-    "Unbound": 0,
-    "Shiny 3★": 0,
-    "Shiny 4★": 0,
-    "Shiny 5★": 0,
-    "Shiny Unbound": 0
+
+const rarities = {
+    "3★": 82.99,
+    "4★": 16.0,
+    "5★": 1.0,
+    "Unbound": 0.01
 };
-let lastSummonGems = 0;
-let totalGemsSpent = 0;
+
+const rarityValue = {
+    "Shiny Unbound": 6,
+    "Unbound": 5,
+    "Shiny": 4,
+    "5★": 3,
+    "4★": 2,
+    "3★": 1
+};
+
+const images = {
+    "3★": "https://i.imgur.com/YVZlVtQ.png",
+    "4★": "https://i.imgur.com/V8E1OQF.png",
+    "5★": "https://i.imgur.com/5bRFl8n.png",
+    "Unbound-Kokushibo": "https://i.imgur.com/J5ZrDEn.png",
+    "Unbound-Chrollo": "https://i.imgur.com/g5twbAv.png"
+};
 
 function chooseBanner(banner) {
-    bannerChosen = banner;
-    document.getElementById("bannerSelected").innerText = "🎯 Banner chosen: " + banner;
+    selectedBanner = banner;
+    document.getElementById("bannerSelecionado").innerText = "🎯 Selected Banner: " + banner;
 }
 
-function summonOnce() {
+function summon(unboundName) {
     pityCounter++;
-    let roll = Math.random() * 100;
-    let rarity;
     if (pityCounter >= 100) {
-        rarity = "5★";
         pityCounter = 0;
-    } else if (roll < 0.01) rarity = "Unbound";
-    else if (roll < 1.01) rarity = "5★";
-    else if (roll < 17.01) rarity = "4★";
-    else rarity = "3★";
-
-    if (rarity === "Unbound" || rarity === "5★") pityCounter = 0;
-
-    let shinyChance = 0.5; // %
-    let isShiny = Math.random() * 100 < shinyChance;
-    if (isShiny) {
-        counts["Shiny " + rarity]++;
+        updatePityCounter();
+        return { name: `5★`, rarity: "5★" };
     }
-
-    counts[rarity]++;
-    return { rarity, isShiny };
+    let roll = Math.random() * 100;
+    let sum = 0;
+    let chosenRarity = "3★";
+    for (let rarity in rarities) {
+        sum += rarities[rarity];
+        if (roll <= sum) {
+            chosenRarity = rarity;
+            break;
+        }
+    }
+    if (chosenRarity === "5★") pityCounter = 0;
+    updatePityCounter();
+    let shinyChance = Math.floor(Math.random() * 1000) === 0;
+    if (shinyChance) {
+        if (chosenRarity === "Unbound") {
+            return { name: `Shiny Unbound - ${unboundName}`, rarity: "Shiny Unbound" };
+        }
+        return { name: `Shiny ${chosenRarity}`, rarity: "Shiny" };
+    }
+    if (chosenRarity === "Unbound") return { name: `Unbound - ${unboundName}`, rarity: "Unbound" };
+    if (chosenRarity === "5★") return { name: `5★`, rarity: "5★" };
+    return { name: `${chosenRarity}`, rarity: chosenRarity };
 }
 
-function summon() {
-    if (!bannerChosen) {
-        alert("Please choose a banner first!");
-        return;
-    }
-    let gemInput = parseInt(document.getElementById("gemsInput").value);
-    if (isNaN(gemInput) || gemInput < 50) {
-        alert("Enter a valid amount of gems (minimum 50).");
-        return;
-    }
-    gems = gemInput;
-    let cost = gems >= 450 ? 450 : 50;
-    lastSummonGems = cost;
-    gems -= cost;
-    totalGemsSpent += cost;
+function startSimulation() {
+    if (!selectedBanner) return alert("Please choose a banner first!");
+    inventory = [];
+    counts = { "3★": 0, "4★": 0, "5★": 0, "Unbound": 0, "Shiny": 0, "Shiny Unbound": 0 };
+    gemsSpent = 0;
+    pityCounter = 0;
+    updatePityCounter();
+    let gems = parseInt(document.getElementById("gemas").value);
+    gemsSpent += gems;
+    updateCounter();
+    document.getElementById("animacao").style.display = "flex";
+    setTimeout(() => {
+        simulate(gems);
+        document.getElementById("continueBtn").style.display = "inline-block";
+    }, 2000);
+}
 
-    let pulls = cost === 450 ? 10 : 1;
-    let results = [];
-    for (let i = 0; i < pulls; i++) {
-        results.push(summonOnce());
+function continueSimulation() {
+    let gems = parseInt(document.getElementById("gemas").value);
+    gemsSpent += gems;
+    updateCounter();
+    document.getElementById("animacao").style.display = "flex";
+    setTimeout(() => simulate(gems), 2000);
+}
+
+function untilUnbound() {
+    if (!selectedBanner) return alert("Please choose a banner first!");
+    let gems = 0;
+    while (true) {
+        let result = summon(selectedBanner === "X" ? "Kokushibo" : "Chrollo");
+        gems += 50;
+        inventory.push(result);
+        counts[result.rarity]++;
+        if (result.rarity.includes("Unbound")) break;
     }
-    showResults(results);
+    gemsSpent += gems;
+    updateCounter();
+    showResults();
     document.getElementById("continueBtn").style.display = "inline-block";
 }
 
-function continueSummoning() {
-    if (!bannerChosen || lastSummonGems === 0) return;
-    if (gems < lastSummonGems) {
-        alert("Not enough gems to continue.");
-        return;
-    }
-    gems -= lastSummonGems;
-    totalGemsSpent += lastSummonGems;
-
-    let pulls = lastSummonGems === 450 ? 10 : 1;
-    let results = [];
-    for (let i = 0; i < pulls; i++) {
-        results.push(summonOnce());
-    }
-    showResults(results);
-}
-
-function summonUntilUnbound() {
-    if (!bannerChosen) {
-        alert("Please choose a banner first!");
-        return;
-    }
-    let gemInput = parseInt(document.getElementById("gemsInput").value);
-    if (isNaN(gemInput) || gemInput < 50) {
-        alert("Enter a valid amount of gems (minimum 50).");
-        return;
-    }
-    gems = gemInput;
-    let results = [];
-    while (gems >= 50) {
-        let cost = gems >= 450 ? 450 : 50;
-        gems -= cost;
-        totalGemsSpent += cost;
-
-        let pulls = cost === 450 ? 10 : 1;
-        for (let i = 0; i < pulls; i++) {
-            let result = summonOnce();
-            results.push(result);
-            if (result.rarity === "Unbound") {
-                showResults(results);
-                document.getElementById("continueBtn").style.display = "inline-block";
-                return;
-            }
+function simulate(totalGems) {
+    let unboundName = (selectedBanner === "X") ? "Kokushibo" : "Chrollo";
+    const SINGLE_COST = 50, MULTI_COST = 450;
+    while (totalGems >= MULTI_COST) {
+        totalGems -= MULTI_COST;
+        for (let i = 0; i < 10; i++) {
+            let item = summon(unboundName);
+            inventory.push(item);
+            counts[item.rarity]++;
         }
     }
-    showResults(results);
-}
-
-function resetSimulator() {
-    bannerChosen = null;
-    gems = 0;
-    pityCounter = 0;
-    lastSummonGems = 0;
-    totalGemsSpent = 0;
-    for (let key in counts) counts[key] = 0;
-    document.getElementById("bannerSelected").innerText = "🎯 No banner selected";
-    document.getElementById("results").innerHTML = "";
-    document.getElementById("continueBtn").style.display = "none";
-}
-
-function showResults(results) {
-    let html = `<p>💎 Gems left: ${gems} | 💰 Total spent: ${totalGemsSpent}</p>`;
-    html += "<ul>";
-    results.forEach(r => {
-        let cssClass = r.rarity === "3★" ? "rarity-3" :
-                       r.rarity === "4★" ? "rarity-4" :
-                       r.rarity === "5★" ? "rarity-5" : "rarity-unbound";
-        html += `<li class="${cssClass}">${r.rarity}${r.isShiny ? " ✨ Shiny" : ""}</li>`;
-    });
-    html += "</ul><hr><h3>📊 Statistics</h3><ul>";
-    for (let key in counts) {
-        html += `<li>${key}: ${counts[key]}</li>`;
+    while (totalGems >= SINGLE_COST) {
+        totalGems -= SINGLE_COST;
+        let item = summon(unboundName);
+        inventory.push(item);
+        counts[item.rarity]++;
     }
-    html += "</ul>";
-    document.getElementById("results").innerHTML = html;
+    showResults();
+    document.getElementById("animacao").style.display = "none";
+}
+
+function showResults() {
+    let best = [...inventory].sort((a, b) => rarityValue[b.rarity] - rarityValue[a.rarity]);
+    let top10 = best.slice(0, 10);
+    let resultHTML = "<h3>Results</h3>";
+    for (let rar in counts) resultHTML += `<p>${rar}: ${counts[rar]}</p>`;
+    resultHTML += "<h4>Top 10:</h4>";
+    top10.forEach(item => {
+        let cls = item.rarity.includes("Unbound") ? "Unbound" : 
+                  item.rarity === "Shiny" ? "Shiny" :
+                  item.rarity === "5★" ? "five" :
+                  item.rarity === "4★" ? "four" : "three";
+        let imgSrc = item.rarity.includes("Unbound") ? images[`Unbound-${selectedBanner === "X" ? "Kokushibo" : "Chrollo"}`] : images[item.rarity.replace("Shiny ", "")];
+        resultHTML += `<div class="card ${cls}"><img src="${imgSrc}"><p>${item.name}</p></div>`;
+    });
+    document.getElementById("resultado").innerHTML = resultHTML;
+}
+
+function updateCounter() {
+    document.getElementById("contadorGemas").textContent = gemsSpent;
+}
+
+function updatePityCounter() {
+    document.getElementById("contadorPity").textContent = pityCounter;
+}
+
+function resetGame() {
+    inventory = [];
+    counts = { "3★": 0, "4★": 0, "5★": 0, "Unbound": 0, "Shiny": 0, "Shiny Unbound": 0 };
+    gemsSpent = 0;
+    pityCounter = 0;
+    updatePityCounter();
+    document.getElementById("resultado").innerHTML = "";
+    document.getElementById("contadorGemas").textContent = "0";
+    document.getElementById("gemas").value = "1000";
+    document.getElementById("bannerSelecionado").innerText = "🎯 No banner selected";
+    document.getElementById("continueBtn").style.display = "none";
+    selectedBanner = null;
 }
 </script>
 
