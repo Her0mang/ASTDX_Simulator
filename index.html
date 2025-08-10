@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎯 Simulador de Summons</title>
+<title>🎯 Summon Simulator</title>
 <style>
     body {
         font-family: 'Segoe UI', sans-serif;
@@ -137,43 +137,43 @@
 </head>
 <body>
 
-<h1>🎯 Simulador de Summons</h1>
+<h1>🎯 Summon Simulator</h1>
 
-<h3>Escolha o Banner:</h3>
-<button class="btn bannerX" onclick="escolherBanner('X')">Banner X (Kokushibo)</button>
-<button class="btn bannerY" onclick="escolherBanner('Y')">Banner Y (Chrollo)</button>
+<h3>Choose the Banner:</h3>
+<button class="btn bannerX" onclick="chooseBanner('X')">Banner X (Kokushibo)</button>
+<button class="btn bannerY" onclick="chooseBanner('Y')">Banner Y (Chrollo)</button>
 
-<p id="bannerSelecionado">🎯 Nenhum banner selecionado</p>
+<p id="bannerSelecionado">🎯 No banner selected</p>
 
-<p>Gemas: <input type="number" id="gemas" value="1000"></p>
-<p><strong>💎 Gemas Gastas:</strong> <span id="contadorGemas">0</span></p>
+<p>Gems: <input type="number" id="gemas" value="1000"></p>
+<p><strong>💎 Total Gems Spent:</strong> <span id="contadorGemas">0</span></p>
 
-<button class="btn start" onclick="iniciarSimulacao()">🎲 Rodar Simulação</button>
-<button class="btn continue" onclick="continuarSimulacao()">⏩ Continuar Girando</button>
-<button class="btn reset" onclick="resetar()">♻ Resetar</button>
+<button class="btn start" onclick="startSimulation()">🎲 Run Simulation</button>
+<button class="btn continue" onclick="continueSimulation()">⏩ Continue Summoning</button>
+<button class="btn reset" onclick="resetGame()">♻ Reset</button>
 
 <div id="resultado"></div>
 
 <div id="animacao">
     <div class="spin"></div>
-    <p>Abrindo...</p>
+    <p>Opening...</p>
 </div>
 
 <script>
-let bannerEscolhido = null;
-let inventario = [];
-let contagem = { "3★": 0, "4★": 0, "5★": 0, "Unbound": 0, "Shiny": 0, "Shiny Unbound": 0 };
-let gemasGastas = 0;
-let pityContador = 0;
+let selectedBanner = null;
+let inventory = [];
+let counts = { "3★": 0, "4★": 0, "5★": 0, "Unbound": 0, "Shiny": 0, "Shiny Unbound": 0 };
+let gemsSpent = 0;
+let pityCounter = 0;
 
-const raridades = {
+const rarities = {
     "3★": 82.99,
     "4★": 16.0,
     "5★": 1.0,
     "Unbound": 0.01
 };
 
-const valorRaridade = {
+const rarityValue = {
     "Shiny Unbound": 6,
     "Unbound": 5,
     "Shiny": 4,
@@ -182,7 +182,7 @@ const valorRaridade = {
     "3★": 1
 };
 
-const imagens = {
+const images = {
     "3★": "https://i.imgur.com/YVZlVtQ.png",
     "4★": "https://i.imgur.com/V8E1OQF.png",
     "5★": "https://i.imgur.com/5bRFl8n.png",
@@ -190,150 +190,150 @@ const imagens = {
     "Unbound-Chrollo": "https://i.imgur.com/g5twbAv.png"
 };
 
-function escolherBanner(banner) {
-    bannerEscolhido = banner;
-    document.getElementById("bannerSelecionado").innerText = "🎯 Banner escolhido: " + banner;
+function chooseBanner(banner) {
+    selectedBanner = banner;
+    document.getElementById("bannerSelecionado").innerText = "🎯 Selected Banner: " + banner;
 }
 
-function summon(unboundNome) {
-    pityContador++;
+function summon(unboundName) {
+    pityCounter++;
 
-    if (pityContador >= 100) {
-        pityContador = 0;
-        return { nome: `5★`, raridade: "5★" };
+    if (pityCounter >= 100) {
+        pityCounter = 0;
+        return { name: `5★`, rarity: "5★" };
     }
 
     let roll = Math.random() * 100;
-    let acumulado = 0;
-    let raridadeEscolhida = "3★";
+    let sum = 0;
+    let chosenRarity = "3★";
 
-    for (let raridade in raridades) {
-        acumulado += raridades[raridade];
-        if (roll <= acumulado) {
-            raridadeEscolhida = raridade;
+    for (let rarity in rarities) {
+        sum += rarities[rarity];
+        if (roll <= sum) {
+            chosenRarity = rarity;
             break;
         }
     }
 
-    if (raridadeEscolhida === "5★") pityContador = 0;
+    if (chosenRarity === "5★") pityCounter = 0;
 
     let shinyChance = Math.floor(Math.random() * 1000) === 0;
     if (shinyChance) {
-        if (raridadeEscolhida === "Unbound") {
-            return { nome: `Shiny Unbound - ${unboundNome}`, raridade: "Shiny Unbound" };
+        if (chosenRarity === "Unbound") {
+            return { name: `Shiny Unbound - ${unboundName}`, rarity: "Shiny Unbound" };
         }
-        return { nome: `Shiny ${raridadeEscolhida}`, raridade: "Shiny" };
+        return { name: `Shiny ${chosenRarity}`, rarity: "Shiny" };
     }
 
-    if (raridadeEscolhida === "Unbound") {
-        return { nome: `Unbound - ${unboundNome}`, raridade: "Unbound" };
+    if (chosenRarity === "Unbound") {
+        return { name: `Unbound - ${unboundName}`, rarity: "Unbound" };
     }
-    if (raridadeEscolhida === "5★") {
-        return { nome: `5★`, raridade: "5★" };
+    if (chosenRarity === "5★") {
+        return { name: `5★`, rarity: "5★" };
     }
-    return { nome: `${raridadeEscolhida}`, raridade: raridadeEscolhida };
+    return { name: `${chosenRarity}`, rarity: chosenRarity };
 }
 
-function iniciarSimulacao() {
-    if (!bannerEscolhido) {
-        alert("Escolha um banner primeiro!");
+function startSimulation() {
+    if (!selectedBanner) {
+        alert("Please choose a banner first!");
         return;
     }
-    inventario = [];
-    contagem = { "3★": 0, "4★": 0, "5★": 0, "Unbound": 0, "Shiny": 0, "Shiny Unbound": 0 };
-    gemasGastas = 0;
+    inventory = [];
+    counts = { "3★": 0, "4★": 0, "5★": 0, "Unbound": 0, "Shiny": 0, "Shiny Unbound": 0 };
+    gemsSpent = 0;
 
-    let gemas = parseInt(document.getElementById("gemas").value);
-    gemasGastas += gemas;
-    atualizarContador();
+    let gems = parseInt(document.getElementById("gemas").value);
+    gemsSpent += gems;
+    updateCounter();
 
     document.getElementById("animacao").style.display = "flex";
-    setTimeout(() => simular(gemas), 2000);
+    setTimeout(() => simulate(gems), 2000);
 }
 
-function continuarSimulacao() {
-    if (!bannerEscolhido) {
-        alert("Escolha um banner primeiro!");
+function continueSimulation() {
+    if (!selectedBanner) {
+        alert("Please choose a banner first!");
         return;
     }
-    let gemas = parseInt(document.getElementById("gemas").value);
-    gemasGastas += gemas;
-    atualizarContador();
+    let gems = parseInt(document.getElementById("gemas").value);
+    gemsSpent += gems;
+    updateCounter();
 
     document.getElementById("animacao").style.display = "flex";
-    setTimeout(() => simular(gemas), 2000);
+    setTimeout(() => simulate(gems), 2000);
 }
 
-function simular(totalGemas) {
-    let unboundNome = (bannerEscolhido === "X") ? "Kokushibo" : "Chrollo";
-    const CUSTO_SINGLE = 50;
-    const CUSTO_MULTI = 450;
+function simulate(totalGems) {
+    let unboundName = (selectedBanner === "X") ? "Kokushibo" : "Chrollo";
+    const SINGLE_COST = 50;
+    const MULTI_COST = 450;
 
-    while (totalGemas >= CUSTO_MULTI) {
-        totalGemas -= CUSTO_MULTI;
+    while (totalGems >= MULTI_COST) {
+        totalGems -= MULTI_COST;
         for (let i = 0; i < 10; i++) {
-            let item = summon(unboundNome);
-            inventario.push(item);
-            contagem[item.raridade]++;
+            let item = summon(unboundName);
+            inventory.push(item);
+            counts[item.rarity]++;
         }
     }
-    while (totalGemas >= CUSTO_SINGLE) {
-        totalGemas -= CUSTO_SINGLE;
-        let item = summon(unboundNome);
-        inventario.push(item);
-        contagem[item.raridade]++;
+    while (totalGems >= SINGLE_COST) {
+        totalGems -= SINGLE_COST;
+        let item = summon(unboundName);
+        inventory.push(item);
+        counts[item.rarity]++;
     }
 
-    mostrarResultados();
+    showResults();
     document.getElementById("animacao").style.display = "none";
 }
 
-function mostrarResultados() {
-    let melhores = [...inventario].sort((a, b) => valorRaridade[b.raridade] - valorRaridade[a.raridade]);
-    let top10 = melhores.slice(0, 10);
+function showResults() {
+    let best = [...inventory].sort((a, b) => rarityValue[b.rarity] - rarityValue[a.rarity]);
+    let top10 = best.slice(0, 10);
 
-    let resultadoHTML = "<h3>Resultados</h3>";
-    for (let rar in contagem) {
-        resultadoHTML += `<p>${rar}: ${contagem[rar]}</p>`;
+    let resultHTML = "<h3>Results</h3>";
+    for (let rar in counts) {
+        resultHTML += `<p>${rar}: ${counts[rar]}</p>`;
     }
 
-    resultadoHTML += "<h4>Top 10:</h4>";
+    resultHTML += "<h4>Top 10:</h4>";
     top10.forEach(item => {
-        let classe = "";
-        if (item.raridade === "Shiny Unbound") classe = "Shiny";
-        else if (item.raridade === "Unbound") classe = "Unbound";
-        else if (item.raridade === "Shiny") classe = "Shiny";
-        else if (item.raridade === "5★") classe = "five";
-        else if (item.raridade === "4★") classe = "four";
-        else classe = "three";
+        let cls = "";
+        if (item.rarity === "Shiny Unbound") cls = "Shiny";
+        else if (item.rarity === "Unbound") cls = "Unbound";
+        else if (item.rarity === "Shiny") cls = "Shiny";
+        else if (item.rarity === "5★") cls = "five";
+        else if (item.rarity === "4★") cls = "four";
+        else cls = "three";
 
         let imgSrc;
-        if (item.raridade.includes("Unbound")) imgSrc = imagens[`Unbound-${bannerEscolhido === "X" ? "Kokushibo" : "Chrollo"}`];
-        else imgSrc = imagens[item.raridade.replace("Shiny ", "")];
+        if (item.rarity.includes("Unbound")) imgSrc = images[`Unbound-${selectedBanner === "X" ? "Kokushibo" : "Chrollo"}`];
+        else imgSrc = images[item.rarity.replace("Shiny ", "")];
 
-        resultadoHTML += `<div class="card ${classe}">
+        resultHTML += `<div class="card ${cls}">
                             <img src="${imgSrc}">
-                            <p>${item.nome}</p>
+                            <p>${item.name}</p>
                           </div>`;
     });
 
-    document.getElementById("resultado").innerHTML = resultadoHTML;
+    document.getElementById("resultado").innerHTML = resultHTML;
 }
 
-function atualizarContador() {
-    document.getElementById("contadorGemas").textContent = gemasGastas;
+function updateCounter() {
+    document.getElementById("contadorGemas").textContent = gemsSpent;
 }
 
-function resetar() {
-    inventario = [];
-    contagem = { "3★": 0, "4★": 0, "5★": 0, "Unbound": 0, "Shiny": 0, "Shiny Unbound": 0 };
-    gemasGastas = 0;
-    pityContador = 0;
+function resetGame() {
+    inventory = [];
+    counts = { "3★": 0, "4★": 0, "5★": 0, "Unbound": 0, "Shiny": 0, "Shiny Unbound": 0 };
+    gemsSpent = 0;
+    pityCounter = 0;
     document.getElementById("resultado").innerHTML = "";
     document.getElementById("contadorGemas").textContent = "0";
     document.getElementById("gemas").value = "1000";
-    document.getElementById("bannerSelecionado").innerText = "🎯 Nenhum banner selecionado";
-    bannerEscolhido = null;
+    document.getElementById("bannerSelecionado").innerText = "🎯 No banner selected";
+    selectedBanner = null;
 }
 </script>
 
